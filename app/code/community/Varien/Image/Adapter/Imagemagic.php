@@ -54,14 +54,18 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             $fileName = $this->_fileSrcPath . $this->_fileSrcName;
         }
 
-        $destinationDir = (isset($destination)) ? $destination : $this->_fileSrcPath;
+        $destinationDir = (isset($destination)) ?
+            $destination : $this->_fileSrcPath;
 
         if (!is_writable($destinationDir)) {
             try {
                 $io = new Varien_Io_File();
                 $io->mkdir($destination);
             } catch (Exception $e) {
-                throw new Exception("Unable to write file into directory '{$destinationDir}'. Access forbidden.");
+                throw
+                    new Exception(
+                        "Unable to write into directory '{$destinationDir}'."
+                    );
             }
         }
 
@@ -152,7 +156,10 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     {
         foreach ($this->_requiredExtensions as $value) {
             if (!extension_loaded($value)) {
-                throw new Exception("Required PHP extension '{$value}' was not loaded.");
+                throw
+                    new Exception(
+                        "Required PHP extension '{$value}' was not loaded."
+                    );
             }
         }
         return true;
