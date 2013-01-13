@@ -138,7 +138,12 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
 
         }
 
-        $this->getImageMagick()->compositeImage($watermark, Imagick::COMPOSITE_OVERLAY, $x, $y);
+        $this->getImageMagick()->compositeImage(
+            $watermark,
+            Imagick::COMPOSITE_OVERLAY,
+            $x,
+            $y
+        );
 
         $watermark->destroy();
     }
