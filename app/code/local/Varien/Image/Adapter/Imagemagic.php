@@ -95,7 +95,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         /** @var $watermark Imagick */
         $watermark = new Imagick($watermarkImage);
 
-        if ($watermark->getImageAlphaChannel() > 0) {
+        if ($watermark->getImageAlphaChannel() == 0) {
             $watermark->setImageOpacity($watermarkImageOpacity / 100);
         }
         // how big are the images?
@@ -138,7 +138,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
 
         }
 
-        $this->getImageMagick()->compositeImage($watermark, Imagick::COMPOSITE_OVER, $x, $y);
+        $this->getImageMagick()->compositeImage($watermark, Imagick::COMPOSITE_OVERLAY, $x, $y);
 
         $watermark->destroy();
     }
