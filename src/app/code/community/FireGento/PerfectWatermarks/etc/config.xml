@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<config>
+    <phpunit>
+        <suite>
+            <modules>
+                <FireGento_PerfectWatermarks/>
+            </modules>
+        </suite>
+    </phpunit>
+    <global>
+        <models>
+            <watermarks>
+                <class>FireGento_PerfectWatermarks_Model</class>
+            </watermarks>
+            <catalog>
+                <rewrite>
+                    <product_image>FireGento_PerfectWatermarks_Model_Product_Image</product_image>
+                </rewrite>
+            </catalog>
+        </models>
+        <helpers>
+            <watermarks>
+                <class>FireGento_PerfectWatermarks_Helper</class>
+            </watermarks>
+        </helpers>
+    </global>
+    <default>
+        <design>
+            <watermark>
+                <image_adapter>GD2</image_adapter>
+                <small_image_adapter>GD2</small_image_adapter>
+                <thumbnail_adapter>GD2</thumbnail_adapter>
+            </watermark>
+        </design>
+    </default>
+</config>

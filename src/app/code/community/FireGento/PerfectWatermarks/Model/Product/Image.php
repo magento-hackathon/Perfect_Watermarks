@@ -1,7 +1,5 @@
 <?php
-/**
- *
- */
+
 class FireGento_PerfectWatermarks_Model_Product_Image
     extends Mage_Catalog_Model_Product_Image
 {
@@ -14,7 +12,7 @@ class FireGento_PerfectWatermarks_Model_Product_Image
         if (!$this->_processor) {
             $this->_processor = new Varien_Image(
                 $this->getBaseFile(),
-                Varien_Image_Adapter::ADAPTER_IM
+                Mage::getStoreConfig('design/watermark/image_adapter')
             );
         }
         $this->_processor->keepAspectRatio($this->_keepAspectRatio);

@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<config>
+    <sections>
+        <design>
+            <groups>
+                <watermark>
+                    <fields>
+                        <adapter>
+                            <label>Image Adatpter</label>
+                            <frontend_type>select</frontend_type>
+                            <comment>Please choose your image adapter</comment>
+                            <source_model>watermarks/source_image_adapter</source_model>
+                            <backend_model>watermarks/system_config_adapter</backend_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </adapter>
+                    </fields>
+                </watermark>
+            </groups>
+        </design>
+    </sections>
+</config>

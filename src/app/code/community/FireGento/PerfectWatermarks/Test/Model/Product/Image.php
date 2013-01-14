@@ -3,6 +3,7 @@
 class FireGento_PerfectWatermarks_Test_Model_Product_Image
     extends EcomDev_PHPUnit_Test_Case
 {
+    /** @var Mage_Catalog_Model_Product_Image */
     protected $_model;
 
     protected function setUp()
@@ -18,7 +19,7 @@ class FireGento_PerfectWatermarks_Test_Model_Product_Image
             $image, '_getAdapter'
         );
 
-        $this->assertInstanceOf('Varien_Image_Adapter_Imagemagic',
+        $this->assertInstanceOf('Varien_Image_Adapter_Abstract',
             $adapterClass);
     }
 }
