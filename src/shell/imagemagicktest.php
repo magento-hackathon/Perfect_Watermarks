@@ -12,7 +12,8 @@ class Image_Batch_Performance extends Mage_Shell_Abstract
     {
 
         if (!$this->getArg('d')) {
-            return $this->usageHelp();
+            echo $this->usageHelp();
+	    return;
         }
         /** @var $iterator SplFileObject[] */
         $iterator = new DirectoryIterator($this->getArg('d'));
