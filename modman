@@ -1,3 +1,4 @@
 src/app/code/community/FireGento/PerfectWatermarks/  app/code/community/FireGento/PerfectWatermarks/
 src/app/etc/modules/FireGento_PerfectWatermarks.xml app/etc/modules/FireGento_PerfectWatermarks.xml
 src/app/code/community/Varien/Image/Adapter/Imagemagic.php  app/code/community/Varien/Image/Adapter/Imagemagic.php
+src/shell/* shell
