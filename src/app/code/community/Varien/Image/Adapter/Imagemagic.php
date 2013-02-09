@@ -86,45 +86,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
 
     public function resize($width = null, $height = null)
     {
-        $widthFrame = $width;
-        $heightFrame = $height;
-        if ($width == null && $height == null) {
-            return;
-        }
-
-        if ($height == null || $this->_keepAspectRatio == true) {
-            $height = 0;
-        }
-
-        if ($width == null) {
-            $width = 0;
-        }
-
-        $this->getImageMagick()->scaleImage($width, $height);
-        //do only if we want a frame and the aspect ratio changed
-        if ($this->_keepFrame
-            && ($widthFrame != $this->getImageMagick()->getImageWidth()
-                || $height != $this->getImageMagick()->getImageHeight())
-        ) {
-            $newFrameImage = new Imagick();
-            $color = 'rgb(' . implode(',', $this->backgroundColor()) . ')';
-            $newFrameImage->newImage(
-                $widthFrame,
-                $heightFrame,
-                new ImagickPixel($color)
-            );
-            $imageHeight = $this->getImageMagick()->getImageHeight();
-            $yPos = (($heightFrame - $imageHeight) / 2);
-            $newFrameImage->compositeImage(
-                $this->getImageMagick(),
-                Imagick::COMPOSITE_OVER,
-                0,
-                $yPos
-            );
-            $this->getImageMagick()->clear();
-            $this->getImageMagick()->destroy();
-            $this->_imageHandler = $newFrameImage;
-        }
+        $this->getImageMagick()->thumbnailimage($width, $height);
     }
 
     public function rotate($angle)
