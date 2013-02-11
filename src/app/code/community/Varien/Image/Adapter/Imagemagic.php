@@ -126,7 +126,12 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         // Fill desired canvas
         if ($this->keepFrame() === TRUE && $frameWidth != $origWidth && $frameHeight != $origHeight) {
             $composite = new Imagick();
-            $composite->newimage($frameWidth, $frameHeight, new ImagickPixel('white'));
+            if (($color = $this->backgroundColor()) && is_array($color) && count($color) == 3) {
+              $bgColor = new ImagickPixel('rgb('.implode(',',$color).')');
+            } else {
+              $bgColor = new ImagickPixel('white');
+            }
+            $composite->newimage($frameWidth, $frameHeight, $bgColor);
             $composite->setimageformat($imagick->getimageformat());
             $composite->setimagecolorspace($imagick->getimagecolorspace());
             $dstX = floor(($frameWidth - $imagick->getimagewidth()) / 2);
