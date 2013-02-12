@@ -9,6 +9,14 @@ Requirements
 You will need Imagemagick installed and the corresponding php extension
 loaded.
 
+Contribution
+------------
+
+Perfect_Watermarks will be developed in respect to git flow branching model.
+
+* Please use develop for pull request.
+* master will allways be the current "stable" version
+
 Disclaimer
 ----------
 
