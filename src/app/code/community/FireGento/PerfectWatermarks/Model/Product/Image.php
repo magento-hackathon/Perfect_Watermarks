@@ -3,6 +3,24 @@
 class FireGento_PerfectWatermarks_Model_Product_Image
     extends Mage_Catalog_Model_Product_Image
 {
+    private $_disableMemoryCheck = true;
+
+    /**
+     * @return bool
+     */
+    public function getDisableMemoryCheck()
+    {
+        return $this->_disableMemoryCheck;
+    }
+
+    /**
+     * @param $disableMemoryCheck
+     */
+    public function setDisableMemoryCheck($disableMemoryCheck)
+    {
+        $this->_disableMemoryCheck = $disableMemoryCheck;
+    }
+
     /**
      * Overwriten to choose dynamically the image processor.
      * @return Varien_Image
@@ -22,5 +40,18 @@ class FireGento_PerfectWatermarks_Model_Product_Image
         $this->_processor->backgroundColor($this->_backgroundColor);
         $this->_processor->quality($this->_quality);
         return $this->_processor;
+    }
+
+    /**
+     * @param null $file
+     * @return bool
+     */
+    protected function _checkMemory($file = null)
+    {
+        if ($this->getDisableMemoryCheck()) {
+            return true;
+        } else {
+            return parent::_checkMemory($file = null);
+        }
     }
 }
