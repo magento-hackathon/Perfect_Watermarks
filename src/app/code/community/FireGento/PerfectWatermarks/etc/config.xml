@@ -7,6 +7,11 @@
             </modules>
         </suite>
     </phpunit>
+    <modules>
+        <FireGento_PerfectWatermarks>
+            <version>0.3</version>
+        </FireGento_PerfectWatermarks>
+    </modules>
     <global>
         <models>
             <watermarks>
