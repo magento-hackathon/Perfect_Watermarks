@@ -3,7 +3,6 @@ Perfect_Watermarks
 
 A replacement for Magento's GD2 image adapter with imagemagick.
 
-
 Requirements
 ------------
 
@@ -27,10 +26,10 @@ check that imagemagick isn't compiled with OpenMP extension.
 
 Please look here:
 
-http://www.daniloaz.com/en/617/systems/high-cpu-load-when-converting-images-with-imagemagick/
-http://blog.dlcware.com/2010/12/imagemagick-openmp-and-really-bad-performance.html
+- http://www.daniloaz.com/en/617/systems/high-cpu-load-when-converting-images-with-imagemagick/
+- http://blog.dlcware.com/2010/12/imagemagick-openmp-and-really-bad-performance.html
 
 Magento will extensivly check for enough memory to work with the image. The
-extension will allways assume that you will give enough memory to process all
+extension will always assume that you will give enough memory to process all
 your pictures. XHProf proofed that without the memory checking, the image
 proccesing runs much faster.
