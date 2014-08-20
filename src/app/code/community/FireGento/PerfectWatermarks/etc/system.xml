@@ -6,7 +6,7 @@
                 <watermark>
                     <fields>
                         <adapter>
-                            <label>Image Adatpter</label>
+                            <label>Image Adapter</label>
                             <frontend_type>select</frontend_type>
                             <comment>Please choose your image adapter</comment>
                             <source_model>watermarks/source_image_adapter</source_model>

@@ -172,7 +172,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         /** @var $watermark Imagick */
         $watermark = new Imagick($watermarkImage);
 
-        if ($watermark->getImageAlphaChannel() == 0) {
+        if ($watermark->getImageAlphaChannel() == imagick::ALPHACHANNEL_UNDEFINED) {
             $watermarkImageOpacity =
                 $this->getWatermarkImageOpacity() != null ?
                     $this->getWatermarkImageOpacity() : $watermarkImageOpacity;
