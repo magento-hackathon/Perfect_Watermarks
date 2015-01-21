@@ -68,7 +68,9 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             }
         }
         //set compression quality
-        $this->getImageMagick()->setImageCompressionQuality($this->_quality);
+        $this->getImageMagick()->setImageCompressionQuality(
+            $this->getQuality()
+        );
         //remove all underlying information
         $this->getImageMagick()->stripImage();
         //write to file system
@@ -78,12 +80,20 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $this->getImageMagick()->destroy();
     }
 
+    /**
+     * Just display the image
+     */
     public function display()
     {
         header("Content-type: " . $this->getMimeType());
         echo $this->getImageMagick();
     }
 
+    /**
+     * @param null $frameWidth
+     * @param null $frameHeight
+     * @throws Exception
+     */
     public function resize($frameWidth = null, $frameHeight = null)
     {
         if (empty($frameWidth) && empty($frameHeight)) {
@@ -93,28 +103,25 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $imagick = $this->getImageMagick();
 
         // calculate lacking dimension
-        $origWidth = $imagick->getimagewidth();
-        $origHeight = $imagick->getimageheight();
+        $origWidth = $imagick->getImageWidth();
+        $origHeight = $imagick->getImageHeight();
         if ($this->keepFrame() === TRUE) {
             if (null === $frameWidth) {
                 $frameWidth = $frameHeight;
-            }
-            elseif (null === $frameHeight) {
+            } elseif (null === $frameHeight) {
                 $frameHeight = $frameWidth;
             }
-        }
-        else {
+        } else {
             if (null === $frameWidth) {
                 $frameWidth = round($frameHeight * ($origWidth / $origHeight));
-            }
-            elseif (null === $frameHeight) {
+            } elseif (null === $frameHeight) {
                 $frameHeight = round($frameWidth * ($origHeight / $origWidth));
             }
         }
 
         if ($this->_keepAspectRatio && $this->_constrainOnly) {
             if (($frameWidth >= $origWidth) && ($frameHeight >= $origHeight)) {
-                $frameWidth  = $origWidth;
+                $frameWidth = $origWidth;
                 $frameHeight = $origHeight;
             }
         }
@@ -124,30 +131,53 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $imagick->scaleimage($frameWidth, $frameHeight, true);
 
         // Fill desired canvas
-        if ($this->keepFrame() === TRUE && $frameWidth != $origWidth && $frameHeight != $origHeight) {
+        if ($this->keepFrame() === TRUE
+            && $frameWidth != $origWidth
+            && $frameHeight != $origHeight
+        ) {
             $composite = new Imagick();
-            if (($color = $this->backgroundColor()) && is_array($color) && count($color) == 3) {
-              $bgColor = new ImagickPixel('rgb('.implode(',',$color).')');
+            $color = $this->_backgroundColor;
+            if ($color
+                && is_array($color)
+                && count($color) == 3
+            ) {
+                $bgColor = new ImagickPixel(
+                    'rgb(' . implode(',', $color) . ')'
+                );
             } else {
-              $bgColor = new ImagickPixel('white');
+                $bgColor = new ImagickPixel('white');
             }
             $composite->newimage($frameWidth, $frameHeight, $bgColor);
             $composite->setimageformat($imagick->getimageformat());
             $composite->setimagecolorspace($imagick->getimagecolorspace());
             $dstX = floor(($frameWidth - $imagick->getimagewidth()) / 2);
             $dstY = floor(($frameHeight - $imagick->getimageheight()) / 2);
-            $composite->compositeimage($imagick, Imagick::COMPOSITE_OVER, $dstX, $dstY);
+            $composite->compositeimage(
+                $imagick,
+                Imagick::COMPOSITE_OVER,
+                $dstX,
+                $dstY
+            );
             $this->_imageHandler = $composite;
             $imagick->clear();
             $imagick->destroy();
         }
     }
 
+    /**
+     * @param $angle
+     */
     public function rotate($angle)
     {
         $this->getImageMagick()->rotateimage(new ImagickPixel(), $angle);
     }
 
+    /**
+     * @param int $top
+     * @param int $left
+     * @param int $right
+     * @param int $bottom
+     */
     public function crop($top = 0, $left = 0, $right = 0, $bottom = 0)
     {
         if ($left == 0 && $top == 0 && $right == 0 && $bottom == 0) {
@@ -162,6 +192,13 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         );
     }
 
+    /**
+     * @param $watermarkImage
+     * @param int $positionX
+     * @param int $positionY
+     * @param int $watermarkImageOpacity
+     * @param bool $repeat
+     */
     public function watermark(
         $watermarkImage,
         $positionX = 0,
@@ -172,12 +209,23 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         /** @var $watermark Imagick */
         $watermark = new Imagick($watermarkImage);
 
-        if ($watermark->getImageAlphaChannel() == imagick::ALPHACHANNEL_UNDEFINED) {
-            $watermarkImageOpacity =
-                $this->getWatermarkImageOpacity() != null ?
-                    $this->getWatermarkImageOpacity() : $watermarkImageOpacity;
-            $watermark->setImageOpacity($watermarkImageOpacity / 100);
+        //better method to blow up small images.
+        $watermark->setimageinterpolatemethod(
+            Imagick::INTERPOLATE_NEARESTNEIGHBOR
+        );
+
+        if ($this->_watermarkImageOpacity == null) {
+            $opc = $watermarkImageOpacity;
+        } else {
+            $opc = $this->getWatermarkImageOpacity();
         }
+
+        $watermark->evaluateImage(
+            Imagick::EVALUATE_MULTIPLY,
+            $opc,
+            Imagick::CHANNEL_ALPHA
+        );
+
         // how big are the images?
         $iWidth = $this->getImageMagick()->getImageWidth();
         $iHeight = $this->getImageMagick()->getImageHeight();
@@ -242,6 +290,10 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $watermark->destroy();
     }
 
+    /**
+     * @return bool
+     * @throws Exception
+     */
     public function checkDependencies()
     {
         foreach ($this->_requiredExtensions as $value) {
@@ -259,5 +311,27 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     {
         @$this->getImageMagick()->clear();
         @$this->getImageMagick()->destroy();
+    }
+
+    /**
+     * @return int
+     */
+    public function getQuality()
+    {
+        if ($this->_quality == null) {
+            $this->_quality = 80;
+        }
+        return $this->_quality;
+    }
+
+    /**
+     * @return float
+     */
+    public function getWatermarkImageOpacity()
+    {
+        if ($this->_watermarkImageOpacity == 0) {
+            return $this->_watermarkImageOpacity = 0;
+        }
+        return $this->_watermarkImageOpacity / 100;
     }
 }
