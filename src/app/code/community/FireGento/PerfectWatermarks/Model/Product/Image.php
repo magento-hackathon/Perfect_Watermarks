@@ -30,7 +30,7 @@ class FireGento_PerfectWatermarks_Model_Product_Image
         if (!$this->_processor) {
             $this->_processor = new Varien_Image(
                 $this->getBaseFile(),
-                Mage::getStoreConfig('design/watermark/image_adapter')
+                Mage::getStoreConfig('design/watermark_adapter/adapter')
             );
         }
         $this->_processor->keepAspectRatio($this->_keepAspectRatio);
