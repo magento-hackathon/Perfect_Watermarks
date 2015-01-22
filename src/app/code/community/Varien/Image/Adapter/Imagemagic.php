@@ -29,10 +29,12 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
      */
     public function open($fileName)
     {
+        Varien_Profiler::start(__METHOD__);
         $this->_fileName = $fileName;
         $this->getMimeType();
         $this->_getFileAttributes();
         $this->getImageMagick()->readimage($fileName);
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
@@ -44,6 +46,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
      */
     public function save($destination = null, $newName = null)
     {
+        Varien_Profiler::start(__METHOD__);
         if (isset($destination) && isset($newName)) {
             $fileName = $destination . "/" . $newName;
         } elseif (isset($destination) && !isset($newName)) {
@@ -64,6 +67,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
                 $io = new Varien_Io_File();
                 $io->mkdir($destination);
             } catch (Exception $e) {
+                Varien_Profiler::stop(__METHOD__);
                 throw
                 new Exception(
                     "Unable to write into directory '{$destinationDir}'."
@@ -81,6 +85,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         //clear data and free resources
         $this->getImageMagick()->clear();
         $this->getImageMagick()->destroy();
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
@@ -103,6 +108,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             throw new Exception('Invalid image dimensions.');
         }
 
+        Varien_Profiler::start(__METHOD__);
         $imagick = $this->getImageMagick();
 
         // calculate lacking dimension
@@ -165,6 +171,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             $imagick->clear();
             $imagick->destroy();
         }
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
@@ -209,6 +216,8 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $watermarkImageOpacity = 30,
         $repeat = false)
     {
+        Varien_Profiler::start(__METHOD__);
+
         /** @var $watermark Imagick */
         $watermark = new Imagick($watermarkImage);
 
@@ -291,6 +300,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         );
         $watermark->clear();
         $watermark->destroy();
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
