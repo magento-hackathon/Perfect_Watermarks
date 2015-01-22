@@ -17,6 +17,9 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     {
         if ($this->_imageHandler === null) {
             $this->_imageHandler = new Imagick();
+            if ($threadLimit = Mage::getStoreConfig('design/watermark_adapter/thread_limit')) {
+                $this->_imageHandler->setResourceLimit(6,max(1,min((int)$threadLimit,24))); // No constant available for threads
+            }
         }
         return $this->_imageHandler;
     }

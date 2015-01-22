@@ -31,11 +31,10 @@
     </global>
     <default>
         <design>
-            <watermark>
-                <image_adapter>GD2</image_adapter>
-                <small_image_adapter>GD2</small_image_adapter>
-                <thumbnail_adapter>GD2</thumbnail_adapter>
-            </watermark>
+            <watermark_adapter>
+                <adapter>GD2</adapter>
+                <thread_limit>1</thread_limit>
+            </watermark_adapter>
         </design>
     </default>
 </config>
