@@ -171,6 +171,9 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             $imagick->clear();
             $imagick->destroy();
         }
+
+        $this->refreshImageDimensions();
+
         Varien_Profiler::stop(__METHOD__);
     }
 
@@ -180,6 +183,8 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     public function rotate($angle)
     {
         $this->getImageMagick()->rotateimage(new ImagickPixel(), $angle);
+
+        $this->refreshImageDimensions();
     }
 
     /**
@@ -193,13 +198,19 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         if ($left == 0 && $top == 0 && $right == 0 && $bottom == 0) {
             return;
         }
+
+        $newWidth = $this->_imageSrcWidth - $left - $right;
+        $newHeight = $this->_imageSrcHeight - $top - $bottom;
+
         /* because drlrdsen said so!  */
         $this->getImageMagick()->cropImage(
-            $right - $left,
-            $bottom - $top,
+            $newWidth,
+            $newHeight,
             $left,
             $top
         );
+
+        $this->refreshImageDimensions();
     }
 
     /**
@@ -318,6 +329,13 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             }
         }
         return true;
+    }
+
+    protected function refreshImageDimensions()
+    {
+        $this->_imageSrcWidth = $this->_imageHandler->getImageWidth();
+        $this->_imageSrcHeight = $this->_imageHandler->getImageHeight();
+        $this->_imageHandler->setImagePage($this->_imageSrcWidth, $this->_imageSrcHeight, 0, 0);
     }
 
     public function __destruct()
