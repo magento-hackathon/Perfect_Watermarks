@@ -163,7 +163,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
                 $profiles = $imagick->getimageprofiles('*', false);
                 // we're only interested if ICC profile(s) exist
                 $has_icc_profile = (array_search('icc', $profiles) !== false);
-				$lib_base_dir = Mage::getBaseDir('lib');
+                $lib_base_dir = Mage::getBaseDir('lib');
                 // if it doesnt have a CMYK ICC profile, we add one
                 if ($has_icc_profile === false) {
                     $icc_cmyk = file_get_contents($lib_base_dir. '/FireGento/PerfectWatermarks/icc_profiles/USWebUncoated.icc');
