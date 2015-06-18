@@ -1,23 +1,11 @@
 {
-    "name": "firegento/perfect_watermarks",
-    "license": "GPL-3.0",
+    "name": "magento-hackathon/perfect_watermarks",
     "type": "magento-module",
-    "description": "A replacement for Magento's GD2 image adapter with imagemagick.",
-    "authors":[
-            {
-                "name":"Fabian Blechschmidt"
-            },
-            {
-                "name":"Karl Spies"
-            }
-        ],
-    "require": {
-        "magento-hackathon/magento-composer-installer": "*"
-    },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "http://packages.firegento.com"
-        }
-    ]
+    "description": "Replacement for Magento's GD2 image adapter with imagemagick",
+    "license": "OSL-3.0",
+    "authors": [
+    {
+        "name": "Karl Spies"
+    }],
+    "homepage": "https://github.com/magento-hackathon/Perfect_Watermarks"
 }

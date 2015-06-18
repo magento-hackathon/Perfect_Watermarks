@@ -17,6 +17,9 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     {
         if ($this->_imageHandler === null) {
             $this->_imageHandler = new Imagick();
+            if ($threadLimit = Mage::getStoreConfig('design/watermark_adapter/thread_limit')) {
+                $this->_imageHandler->setResourceLimit(6,max(1,min((int)$threadLimit,24))); // No constant available for threads
+            }
         }
         return $this->_imageHandler;
     }
@@ -26,10 +29,12 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
      */
     public function open($fileName)
     {
+        Varien_Profiler::start(__METHOD__);
         $this->_fileName = $fileName;
         $this->getMimeType();
         $this->_getFileAttributes();
         $this->getImageMagick()->readimage($fileName);
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
@@ -41,6 +46,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
      */
     public function save($destination = null, $newName = null)
     {
+        Varien_Profiler::start(__METHOD__);
         if (isset($destination) && isset($newName)) {
             $fileName = $destination . "/" . $newName;
         } elseif (isset($destination) && !isset($newName)) {
@@ -61,6 +67,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
                 $io = new Varien_Io_File();
                 $io->mkdir($destination);
             } catch (Exception $e) {
+                Varien_Profiler::stop(__METHOD__);
                 throw
                 new Exception(
                     "Unable to write into directory '{$destinationDir}'."
@@ -78,6 +85,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         //clear data and free resources
         $this->getImageMagick()->clear();
         $this->getImageMagick()->destroy();
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
@@ -100,6 +108,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             throw new Exception('Invalid image dimensions.');
         }
 
+        Varien_Profiler::start(__METHOD__);
         $imagick = $this->getImageMagick();
 
         // calculate lacking dimension
@@ -149,6 +158,24 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             }
             $composite->newimage($frameWidth, $frameHeight, $bgColor);
             $composite->setimageformat($imagick->getimageformat());
+
+            if($imagick->getimagecolorspace() == Imagick::COLORSPACE_CMYK) {
+                $profiles = $imagick->getimageprofiles('*', false);
+                // we're only interested if ICC profile(s) exist
+                $has_icc_profile = (array_search('icc', $profiles) !== false);
+                // if it doesnt have a CMYK ICC profile, we add one
+                if ($has_icc_profile === false) {
+                    $icc_cmyk = file_get_contents(__DIR__ . '/icc_profiles/USWebUncoated.icc');
+                    $imagick->profileImage('icc', $icc_cmyk);
+                    unset($icc_cmyk);
+                }
+                // then we add an RGB profile
+                $icc_rgb = file_get_contents(__DIR__ . '/icc_profiles/sRGB.icc');
+                $imagick->profileImage('icc', $icc_rgb);
+                unset($icc_rgb);
+                $imagick->setimagecolorspace(Imagick::COLORSPACE_SRGB);
+            }
+
             $composite->setimagecolorspace($imagick->getimagecolorspace());
             $dstX = floor(($frameWidth - $imagick->getimagewidth()) / 2);
             $dstY = floor(($frameHeight - $imagick->getimageheight()) / 2);
@@ -162,6 +189,10 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             $imagick->clear();
             $imagick->destroy();
         }
+
+        $this->refreshImageDimensions();
+
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
@@ -170,6 +201,8 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     public function rotate($angle)
     {
         $this->getImageMagick()->rotateimage(new ImagickPixel(), $angle);
+
+        $this->refreshImageDimensions();
     }
 
     /**
@@ -183,13 +216,19 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         if ($left == 0 && $top == 0 && $right == 0 && $bottom == 0) {
             return;
         }
+
+        $newWidth = $this->_imageSrcWidth - $left - $right;
+        $newHeight = $this->_imageSrcHeight - $top - $bottom;
+
         /* because drlrdsen said so!  */
         $this->getImageMagick()->cropImage(
-            $right - $left,
-            $bottom - $top,
+            $newWidth,
+            $newHeight,
             $left,
             $top
         );
+
+        $this->refreshImageDimensions();
     }
 
     /**
@@ -206,6 +245,8 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $watermarkImageOpacity = 30,
         $repeat = false)
     {
+        Varien_Profiler::start(__METHOD__);
+
         /** @var $watermark Imagick */
         $watermark = new Imagick($watermarkImage);
 
@@ -288,6 +329,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         );
         $watermark->clear();
         $watermark->destroy();
+        Varien_Profiler::stop(__METHOD__);
     }
 
     /**
@@ -305,6 +347,13 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             }
         }
         return true;
+    }
+
+    protected function refreshImageDimensions()
+    {
+        $this->_imageSrcWidth = $this->_imageHandler->getImageWidth();
+        $this->_imageSrcHeight = $this->_imageHandler->getImageHeight();
+        $this->_imageHandler->setImagePage($this->_imageSrcWidth, $this->_imageSrcHeight, 0, 0);
     }
 
     public function __destruct()
