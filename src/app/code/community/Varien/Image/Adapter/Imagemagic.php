@@ -156,6 +156,17 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             } else {
                 $bgColor = new ImagickPixel('white');
             }
+
+            /**
+             * If image mime type is 'image/png' and keep transparency parameter is set to TRUE
+             * We set 'none' for ImagickPixel color param in order to properly keep transparency
+             */
+            if ($this->_fileMimeType == image_type_to_mime_type(IMAGETYPE_PNG)
+                && $this->_keepTransparency
+            ) {
+                $bgColor = new ImagickPixel('none');
+            }
+
             $composite->newimage($frameWidth, $frameHeight, $bgColor);
             $composite->setimageformat($imagick->getimageformat());
 
