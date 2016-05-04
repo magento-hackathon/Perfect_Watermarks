@@ -39,6 +39,9 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $this->_fileName = $fileName;
         $this->getMimeType();
         $this->_getFileAttributes();
+        if ( ! in_array($this->getMimeType(), ['image/png', 'image/jpeg', 'image/gif'])) {
+            throw new Varien_Exception('Unsupported image file: '.$this->getMimeType());
+        }
         $this->getImageMagick()->readimage($fileName);
         Varien_Profiler::stop(__METHOD__);
     }
