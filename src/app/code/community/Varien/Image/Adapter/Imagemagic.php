@@ -7,6 +7,12 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
 
     protected $_requiredExtensions = array('imagick');
 
+    protected $_allowedTypes = [
+        'image/png',
+        'image/jpeg',
+        'image/gif',
+    ];
+
     /**
      * Get the Imagemagick class.
      *
@@ -31,16 +37,34 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     }
 
     /**
+     * Overrides broken core method (returns string the first time and int the second time)
+     *
+     * @return null|string
+     * @throws Varien_Exception
+     */
+    public function getMimeType()
+    {
+        if( ! $this->_fileMimeType ) {
+            list($this->_imageSrcWidth, $this->_imageSrcHeight, $this->_fileType, ) = @getimagesize($this->_fileName);
+            if ( ! $this->_fileType) {
+                throw new Varien_Exception('Could not get image file type.');
+            }
+            $this->_fileMimeType = image_type_to_mime_type($this->_fileType);
+        }
+        return $this->_fileMimeType;
+    }
+
+    /**
      * @param $fileName
+     * @throws Varien_Exception
      */
     public function open($fileName)
     {
         Varien_Profiler::start(__METHOD__);
         $this->_fileName = $fileName;
-        $this->getMimeType();
         $this->_getFileAttributes();
-        if ( ! in_array($this->getMimeType(), ['image/png', 'image/jpeg', 'image/gif'])) {
-            throw new Varien_Exception('Unsupported image file: '.$this->getMimeType());
+        if ( ! in_array($this->getMimeType(), $this->_allowedTypes)) {
+            throw new Varien_Exception('Unsupported image file type: '.$this->getMimeType());
         }
         $this->getImageMagick()->readimage($fileName);
         Varien_Profiler::stop(__METHOD__);
