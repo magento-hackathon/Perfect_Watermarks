@@ -15,7 +15,7 @@ class FireGento_PerfectWatermarks_Model_Source_Image_Adapter
             ),
             array(
                 'value' => Varien_Image_Adapter::ADAPTER_IM,
-                'label' => Mage::helper('watermarks')->__('Imagemagick Adapter')
+                'label' => Mage::helper('watermarks')->__('ImageMagick Adapter')
             )
         );
     }
