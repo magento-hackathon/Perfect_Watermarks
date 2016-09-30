@@ -146,7 +146,10 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         ) {
             $composite = new Imagick();
             $color = $this->_backgroundColor;
-            if ($color
+
+            if ($this->_keepTransparency) {
+                $bgColor = new ImagickPixel('rgba(100%, 100%, 100%, 0)');
+            } else if ($color
                 && is_array($color)
                 && count($color) == 3
             ) {
