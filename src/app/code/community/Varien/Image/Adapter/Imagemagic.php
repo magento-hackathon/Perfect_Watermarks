@@ -141,8 +141,7 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
 
         // Fill desired canvas
         if ($this->keepFrame() === TRUE
-            && $frameWidth != $origWidth
-            && $frameHeight != $origHeight
+            && ($frameWidth != $origWidth || $frameHeight != $origHeight)
         ) {
             $composite = new Imagick();
             $color = $this->_backgroundColor;
