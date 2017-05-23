@@ -23,7 +23,9 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     {
         if ($this->_imageHandler === null) {
             // Set tmp path since Imagick apparently does not choose it well (according to auditd file access errors)
-            Imagick::setRegistry('temporary-path', Mage::getBaseDir('tmp'));
+            if (method_exists('Imagick','setRegistry')) {
+                Imagick::setRegistry('temporary-path', Mage::getBaseDir('tmp'));
+            }
             $version = Imagick::getVersion();
             if (strpos($version['versionString'], 'ImageMagick 6.7.') === 0) {
                 chdir(Mage::getBaseDir('tmp')); // Old versions don't use temporary-path but instead the cwd
