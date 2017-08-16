@@ -135,8 +135,12 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
             }
         }
 
-        // Resize
-        $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_BICUBIC);
+        // Resize image. Bicubic interpolation does not always seem available, even with a high enough version of
+        // ImageMagick. However the default interpolation method also seems to produce decent results.
+        if (defined('Imagick::INTERPOLATE_BICUBIC')) {
+            $imagick->setimageinterpolatemethod(Imagick::INTERPOLATE_BICUBIC);
+        }
+
         $imagick->scaleimage($frameWidth, $frameHeight, true);
 
         // Fill desired canvas
