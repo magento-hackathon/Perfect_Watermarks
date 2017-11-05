@@ -136,13 +136,14 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         }
 
         // Resize
-        $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_BICUBIC);
+        if (defined('imagick::INTERPOLATE_BICUBIC')) {
+            $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_BICUBIC);
+        }
         $imagick->scaleimage($frameWidth, $frameHeight, true);
 
         // Fill desired canvas
         if ($this->keepFrame() === TRUE
-            && $frameWidth != $origWidth
-            && $frameHeight != $origHeight
+            && ($frameWidth != $origWidth || $frameHeight != $origHeight)
         ) {
             $composite = new Imagick();
             $color = $this->_backgroundColor;
