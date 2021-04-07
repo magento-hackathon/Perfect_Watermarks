@@ -7,6 +7,12 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
 
     protected $_requiredExtensions = array('imagick');
 
+    protected $_allowedTypes = [
+        'image/png',
+        'image/jpeg',
+        'image/gif',
+    ];
+
     /**
      * Get the Imagemagick class.
      *
@@ -16,6 +22,14 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     protected function getImageMagick()
     {
         if ($this->_imageHandler === null) {
+            // Set tmp path since Imagick apparently does not choose it well (according to auditd file access errors)
+            if (method_exists('Imagick','setRegistry')) {
+                Imagick::setRegistry('temporary-path', Mage::getBaseDir('tmp'));
+            }
+            $version = Imagick::getVersion();
+            if (strpos($version['versionString'], 'ImageMagick 6.7.') === 0) {
+                chdir(Mage::getBaseDir('tmp')); // Old versions don't use temporary-path but instead the cwd
+            }
             $this->_imageHandler = new Imagick();
             if ($threadLimit = Mage::getStoreConfig('design/watermark_adapter/thread_limit')) {
                 $this->_imageHandler->setResourceLimit(6,max(1,min((int)$threadLimit,24))); // No constant available for threads
@@ -25,14 +39,35 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
     }
 
     /**
+     * Overrides broken core method (returns string the first time and int the second time)
+     *
+     * @return null|string
+     * @throws Varien_Exception
+     */
+    public function getMimeType()
+    {
+        if( ! $this->_fileMimeType ) {
+            list($this->_imageSrcWidth, $this->_imageSrcHeight, $this->_fileType, ) = @getimagesize($this->_fileName);
+            if ( ! $this->_fileType) {
+                throw new Varien_Exception('Could not get image file type.');
+            }
+            $this->_fileMimeType = image_type_to_mime_type($this->_fileType);
+        }
+        return $this->_fileMimeType;
+    }
+
+    /**
      * @param $fileName
+     * @throws Varien_Exception
      */
     public function open($fileName)
     {
         Varien_Profiler::start(__METHOD__);
         $this->_fileName = $fileName;
-        $this->getMimeType();
         $this->_getFileAttributes();
+        if ( ! in_array($this->getMimeType(), $this->_allowedTypes)) {
+            throw new Varien_Exception('Unsupported image file type: '.$this->getMimeType());
+        }
         $this->getImageMagick()->readimage($fileName);
         Varien_Profiler::stop(__METHOD__);
     }
@@ -136,7 +171,11 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         }
 
         // Resize
-        $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_BICUBIC);
+        if (defined('imagick::INTERPOLATE_BICUBIC')) {
+            $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_BICUBIC);
+        } elseif (defined('imagick::INTERPOLATE_NEAREST_PIXEL')) {
+            $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_NEAREST_PIXEL);
+        }
         $imagick->scaleimage($frameWidth, $frameHeight, true);
 
         // Fill desired canvas
@@ -251,9 +290,11 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $watermark = new Imagick($watermarkImage);
 
         //better method to blow up small images.
-        $watermark->setimageinterpolatemethod(
-            Imagick::INTERPOLATE_NEARESTNEIGHBOR
-        );
+        if (defined('imagick::INTERPOLATE_NEARESTNEIGHBOR')) {
+            $watermark->setimageinterpolatemethod(imagick::INTERPOLATE_NEARESTNEIGHBOR);
+        } elseif (defined('imagick::INTERPOLATE_NEAREST_PIXEL')) {
+            $watermark->setimageinterpolatemethod(imagick::INTERPOLATE_NEAREST_PIXEL);
+        }
 
         if ($this->_watermarkImageOpacity == null) {
             $opc = $watermarkImageOpacity;
