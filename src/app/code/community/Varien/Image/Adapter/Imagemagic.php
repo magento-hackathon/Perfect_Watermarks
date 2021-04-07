@@ -171,7 +171,11 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         }
 
         // Resize
-        $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_BICUBIC);
+        if (defined('imagick::INTERPOLATE_BICUBIC')) {
+            $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_BICUBIC);
+        } elseif (defined('imagick::INTERPOLATE_NEAREST_PIXEL')) {
+            $imagick->setimageinterpolatemethod(imagick::INTERPOLATE_NEAREST_PIXEL);
+        }
         $imagick->scaleimage($frameWidth, $frameHeight, true);
 
         // Fill desired canvas
@@ -286,9 +290,11 @@ class Varien_Image_Adapter_Imagemagic extends Varien_Image_Adapter_Abstract
         $watermark = new Imagick($watermarkImage);
 
         //better method to blow up small images.
-        $watermark->setimageinterpolatemethod(
-            Imagick::INTERPOLATE_NEARESTNEIGHBOR
-        );
+        if (defined('imagick::INTERPOLATE_NEARESTNEIGHBOR')) {
+            $watermark->setimageinterpolatemethod(imagick::INTERPOLATE_NEARESTNEIGHBOR);
+        } elseif (defined('imagick::INTERPOLATE_NEAREST_PIXEL')) {
+            $watermark->setimageinterpolatemethod(imagick::INTERPOLATE_NEAREST_PIXEL);
+        }
 
         if ($this->_watermarkImageOpacity == null) {
             $opc = $watermarkImageOpacity;
