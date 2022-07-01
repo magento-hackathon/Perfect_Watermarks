@@ -1,11 +1,11 @@
 {
-    "name": "magento-hackathon/perfect_watermarks",
+    "name": "colinmollenhour/perfect_watermarks",
     "type": "magento-module",
-    "description": "Replacement for Magento's GD2 image adapter with imagemagick",
+    "description": "Replacement for OpenMage's GD2 image adapter with imagemagick",
     "license": "OSL-3.0",
     "authors": [
     {
         "name": "Karl Spies"
     }],
-    "homepage": "https://github.com/magento-hackathon/Perfect_Watermarks"
+    "homepage": "https://github.com/colinmollenhour/Perfect_Watermarks"
 }
